@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "cors": "^2.8.5",
+    "ejs": "^3.1.10",
+    "express": "^5.2.1",
+    "js-yaml": "^4.1.1",
+    "multer": "^2.0.2"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "form",
+  "version": "1.0.0",
+  "main": "server.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

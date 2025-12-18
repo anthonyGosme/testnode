@@ -1,0 +1,29 @@
+tenants:
+  # Identifiant unique interne
+  clientA:
+    active: true
+    name: "Entreprise A"
+    # Comment on reconnait ce client ?
+    match:
+      subdomain: "client-a"      # http://client-a:3000
+      path: "client-a"           # http://localhost:3000/client-a
+    # Où sont ses fichiers ?
+    paths:
+      form: "./tenants/clientA/form.json"
+      action: "./tenants/clientA/action.js"
+    # Config visuelle injectée dans le wrapper
+    theme:
+      primaryColor: "#4f46e5"
+    metaKey: "codeProjet"
+  clientB:
+    active: true
+    name: "Startup B"
+    match:
+      subdomain: "b-corp"
+      path: "b-corp"
+    paths:
+      form: "./tenants/clientB/form.json"
+      # Pas d'action.js définie = pas de hook backend
+    theme:
+      primaryColor: "#e11d48"
+    metaKey: "codeProjet"

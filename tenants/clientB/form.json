@@ -1,0 +1,21 @@
+{
+  "components": [
+    {
+      "type": "textfield",
+      "key": "codeProjet",
+      "label": "Code Projet (Spécifique Client A)",
+      "validate": { "required": true }
+    },
+    {
+      "type": "file",
+      "key": "file",
+      "storage": "url",
+      "url": "{{UPLOAD_URL}}" 
+    },
+    {
+      "type": "button",
+      "action": "submit",
+      "label": "Envoyer"
+    }
+  ]
+}
