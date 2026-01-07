@@ -186,4 +186,16 @@ app.post(['/upload', '/:pathPrefix/upload'], resolveTenant, upload.single('file'
     });
 });
 
+app.get(['/logo.png', '/:pathPrefix/logo.png'], resolveTenant, (req, res) => {
+    if (req.tenant.theme && req.tenant.theme.logo) {
+        // On résout le chemin : ./tenants/clientB/logo.png
+        const logoPath = path.resolve(__dirname, req.tenant.theme.logo);
+        
+        res.sendFile(logoPath, (err) => {
+            if (err) res.status(404).send('Logo introuvable sur le serveur');
+        });
+    } else {
+        res.status(404).send('Aucun logo configuré');
+    }
+});
 app.listen(PORT, () => console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`));

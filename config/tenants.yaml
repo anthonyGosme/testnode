@@ -23,6 +23,7 @@ tenants:
         action: "./tenants/clientB/action.js"
       theme:
         primaryColor: "#059669" # Vert
+        logo: "./tenants/clientB/logo.png"
       metaKey: "nomCandidat"
 
   clientC:

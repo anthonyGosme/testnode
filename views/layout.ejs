@@ -61,9 +61,15 @@
 <body>
 
 <div class="card">
-    <div class="card-header">
+<div class="card-header">
+        <% if (tenant.theme && tenant.theme.logo) { %>
+            <div class="mb-3">
+                <img src="<%= urlBase %>/logo.png" alt="Logo" style="max-height: 60px; max-width: 100%;">
+            </div>
+        <% } %>
+        
         <h3 class="m-0"><%= tenant.name %></h3>
-        <small>Portail Sécurisé</small>
+        <small class="opacity-75">Portail Sécurisé</small>
     </div>
     <div class="card-body">
         <div id="formio"></div>
