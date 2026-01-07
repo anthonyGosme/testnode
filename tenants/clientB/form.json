@@ -1,21 +1,40 @@
 {
   "components": [
     {
+      "type": "header",
+      "content": "Recrutement - Dépôt de CV"
+    },
+    {
       "type": "textfield",
-      "key": "codeProjet",
-      "label": "Code Projet (Spécifique Client A)",
+      "key": "nomCandidat", 
+      "label": "Nom du candidat",
+      "placeholder": "Ex: Jean Dupont",
       "validate": { "required": true }
     },
     {
+      "type": "select",
+      "key": "poste",
+      "label": "Poste visé",
+      "data": {
+        "values": [
+          { "label": "Développeur", "value": "dev" },
+          { "label": "Commercial", "value": "sales" }
+        ]
+      }
+    },
+    {
       "type": "file",
-      "key": "file",
+      "key": "cv",
+      "label": "Votre CV (PDF)",
       "storage": "url",
-      "url": "{{UPLOAD_URL}}" 
+      "url": "{{UPLOAD_URL}}", 
+      "fileKey": "file"
     },
     {
       "type": "button",
       "action": "submit",
-      "label": "Envoyer"
+      "label": "Postuler",
+      "theme": "success"
     }
   ]
 }

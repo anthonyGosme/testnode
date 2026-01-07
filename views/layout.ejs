@@ -82,7 +82,7 @@
 </div>
 
 <script>
-    // Récupération du schéma injecté par le serveur Node.js
+
     const formSchema = <%- JSON.stringify(formSchema) %>;
 
     Formio.createForm(document.getElementById('formio'), formSchema)
@@ -100,25 +100,19 @@
 (function() {
     console.log("🕵️ Démarrage de l'Intercepteur Dynamique...");
 
-    // --- CONFIGURATION DYNAMIQUE ---
-    // On récupère la clé définie dans le YAML (ex: "codeProjet")
-    // Si rien n'est défini dans le YAML, on fallback sur 'refFacture'
     const metaKeyConfig = "<%= tenant.metaKey || 'refFacture' %>";
     console.log(`ℹ️ Configuration Tenant : Le champ métadonnée attendu est "${metaKeyConfig}"`);
 
     const originalOpen = XMLHttpRequest.prototype.open;
     const originalSend = XMLHttpRequest.prototype.send;
 
-    // 1. Capture de l'URL
+
     XMLHttpRequest.prototype.open = function(method, url) {
         this._debugUrl = url; 
         return originalOpen.apply(this, arguments);
     };
 
-    // 2. Interception de l'envoi
     XMLHttpRequest.prototype.send = function(body) {
-        
-        // Est-ce que c'est une requête d'upload ?
         if (this._debugUrl && this._debugUrl.includes('upload')) {
             console.log("🎯 Upload détecté vers : " + this._debugUrl);
             
@@ -131,8 +125,7 @@
                 console.log(`   ✅ Champ "${inputName}" trouvé. Valeur : "${valeur}"`);
                 
                 if (valeur && valeur.trim() !== "") {
-                    // Injection dans le Header HTTP
-                    // On construit le header : x-meta-nomduchamp (tout en minuscule)
+
                     const headerName = `x-meta-${metaKeyConfig.toLowerCase()}`;
                     const safeValue = encodeURIComponent(valeur);
                     
