@@ -1,0 +1,31 @@
+{
+  "components": [
+    {
+      "type": "textfield",
+      "key": "userLogin",
+      "label": "Utilisateur Connecté",
+      "disabled": true,
+      "validate": { "required": true }
+    },
+    {
+      "type": "textfield",
+      "key": "refDossier",
+      "label": "Référence Dossier",
+      "placeholder": "Saisir la référence...",
+      "validate": { "required": true }
+    },
+    {
+      "type": "file",
+      "key": "file",
+      "label": "Fichier à déposer",
+      "storage": "url",
+      "url": "{{UPLOAD_URL}}" 
+    },
+    {
+      "type": "button",
+      "action": "submit",
+      "label": "Valider le dépôt",
+      "theme": "primary"
+    }
+  ]
+}

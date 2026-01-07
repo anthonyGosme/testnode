@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail de Gestion Documentaire</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            height: 100%;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .card-header-custom {
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+        }
+        .btn-custom {
+            width: 100%;
+            padding: 0.75rem;
+            font-weight: 500;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        /* Couleurs spécifiques aux clients */
+        .theme-a { background: linear-gradient(to right, #4f46e5, #6366f1); }
+        .btn-theme-a { background-color: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe; }
+        .btn-theme-a:hover { background-color: #4f46e5; color: white; }
+
+        .theme-b { background: linear-gradient(to right, #059669, #10b981); }
+        .btn-theme-b { background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .btn-theme-b:hover { background-color: #059669; color: white; }
+
+        .theme-c { background: linear-gradient(to right, #d946ef, #e879f9); }
+        .btn-theme-c { background-color: #d946ef; color: white; border: none; }
+        .btn-theme-c:hover { background-color: #c026d3; }
+    </style>
+</head>
+<body>
+
+    <div class="hero-section text-center">
+        <div class="container">
+            <h1><i class="fa-solid fa-cloud-arrow-up"></i> Plateforme d'Échange</h1>
+            <p class="lead opacity-75">Sélectionnez un espace client pour déposer vos documents</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row g-4 justify-content-center">
+
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header-custom theme-a">
+                        <i class="fa-solid fa-building"></i> Entreprise A
+                    </div>
+                    <div class="card-body text-center">
+                        <p class="text-muted small my-3">Accès standard au portail de dépôt.</p>
+                        <button onclick="openLink('client-a')" class="btn btn-custom btn-theme-a">
+                            Accéder à l'espace
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header-custom theme-b">
+                        <i class="fa-solid fa-users"></i> Recrutement RH
+                    </div>
+                    <div class="card-body text-center">
+                        <p class="text-muted small my-3">Espace de dépôt des candidatures.</p>
+                        <button onclick="openLink('client-b')" class="btn btn-custom btn-theme-b">
+                            Accéder à l'espace
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header-custom theme-c">
+                        <i class="fa-solid fa-folder-open"></i> Client C
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-light border text-center small mb-3">
+                            <i class="fa-solid fa-info-circle text-muted"></i> Simulation d'ouverture depuis un dossier métier.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-secondary">Référence Dossier</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="fa-solid fa-fingerprint text-secondary"></i></span>
+                                <input type="text" class="form-control" id="refDossierC" value="DOS-2024-X99" placeholder="Ex: REF-123">
+                            </div>
+                        </div>
+
+                        <button onclick="openClientC()" class="btn btn-custom btn-theme-c shadow-sm">
+                            <i class="fa-solid fa-rocket"></i>
+                            Injecter & Ouvrir
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header-custom" style="background: #0f172a; color: white;">
+                        <i class="fa-solid fa-lock"></i> Client D
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="alert alert-light border small mb-3">
+                            <i class="fa-solid fa-user-secret text-dark"></i> Simule une page de login avant l'affichage du formulaire.
+                        </div>
+                        <p class="small text-muted">Login: <b>admin</b> / Pass: <b>1234</b></p>
+                        
+                        <button onclick="openLink('client-d')" class="btn btn-dark w-100 py-2">
+                            <i class="fa-solid fa-key"></i> Tenter l'accès
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+
+        // Pour Client A et B (Simple redirection)
+        function openLink(path) {
+            window.open(`${BASE_URL}/${path}`, '_blank');
+        }
+
+        // Pour Client C (Construction d'URL avec paramètre)
+        function openClientC() {
+            const ref = document.getElementById('refDossierC').value.trim();
+            if(!ref) {
+                alert("Merci de saisir une référence dossier.");
+                return;
+            }
+            // On passe 'refDossier' en paramètre GET
+            const url = `${BASE_URL}/client-c?refDossier=${encodeURIComponent(ref)}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>

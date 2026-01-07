@@ -98,30 +98,16 @@
 <% if (tenant.paths && tenant.paths.preflight) { %>
     <script src="<%= urlBase %>/preflight.js"></script>
 <% } %>
+
 <script>
 (function() {
-    window.PREFLIGHT_CACHE = {};
-    console.log("preglight test");
-    if (typeof window.runPreflight === 'function') {
-        console.log("🕵️ Lancement du Preflight au chargement...");
-        window.runPreflight()
-            .then(meta => {
-                window.PREFLIGHT_CACHE = meta || {};
-                console.log("✅ Données Preflight chargées :", window.PREFLIGHT_CACHE);
-            })
-            .catch(err => {
-                console.error("❌ Erreur Preflight :", err);
-            });
-    }
-
-    console.log("🕵️ Démarrage de l'Intercepteur Dynamique...");
-
+    // --- 1. CONFIGURATION INTERCEPTEUR (Reste actif pour l'upload) ---
+    // On le déclare tout de suite pour qu'il soit prêt
+    window.PREFLIGHT_CACHE = {}; 
     const metaKeyConfig = "<%= tenant.metaKey || 'refFacture' %>";
-    console.log(`ℹ️ Configuration Tenant : Le champ métadonnée attendu est "${metaKeyConfig}"`);
-
+    
     const originalOpen = XMLHttpRequest.prototype.open;
     const originalSend = XMLHttpRequest.prototype.send;
-
 
     XMLHttpRequest.prototype.open = function(method, url) {
         this._debugUrl = url; 
@@ -130,41 +116,72 @@
 
     XMLHttpRequest.prototype.send = function(body) {
         if (this._debugUrl && this._debugUrl.includes('upload')) {
-            console.log("🎯 Upload détecté vers : " + this._debugUrl);
-            
-            // Construction du nom du champ tel que Form.io le génère : data[monChamp]
+            // ... (Votre logique d'injection de headers existante) ...
+            // Elle utilisera window.PREFLIGHT_CACHE qui sera rempli juste après
+            if (window.PREFLIGHT_CACHE) {
+                 Object.keys(window.PREFLIGHT_CACHE).forEach(key => {
+                    let headerKey = key.toLowerCase();
+                    if (!headerKey.startsWith('x-meta-')) headerKey = `x-meta-ctx-${headerKey}`; 
+                    this.setRequestHeader(headerKey, encodeURIComponent(window.PREFLIGHT_CACHE[key]));
+                });
+            }
+            // Injection de la valeur du champ principal (metaKey)
             const inputName = `data[${metaKeyConfig}]`;
             const inputElement = document.querySelector(`input[name="${inputName}"]`);
-            
-            if (inputElement) {
-                const valeur = inputElement.value;
-                console.log(`   ✅ Champ "${inputName}" trouvé. Valeur : "${valeur}"`);
-                
-                if (valeur && valeur.trim() !== "") {
-
-                    const headerName = `x-meta-${metaKeyConfig.toLowerCase()}`;
-                    const safeValue = encodeURIComponent(valeur);
-                    
-                    this.setRequestHeader(headerName, safeValue);
-                    console.log(`   🚀 Header injecté : ${headerName} = ${safeValue}`);
-                } else {
-                    console.warn(`   ⚠️ Le champ "${metaKeyConfig}" est vide !`);
-                    alert(`Attention : Veuillez remplir le champ "${metaKeyConfig}" AVANT de sélectionner le fichier.`);
-                }
-            } else {
-                console.error(`   ❌ ERREUR CRITIQUE : Impossible de trouver l'input avec name="${inputName}"`);
-                console.log("   🔍 Debug : Voici les inputs disponibles dans la page :");
-                document.querySelectorAll('input').forEach(el => console.log(`      - name="${el.name}"`));
+            if (inputElement && inputElement.value) {
+                 this.setRequestHeader(`x-meta-${metaKeyConfig.toLowerCase()}`, encodeURIComponent(inputElement.value));
             }
         }
-        
         return originalSend.apply(this, arguments);
     };
 
+
+    // --- 2. ORCHESTRATION : PREFLIGHT PUIS FORMULAIRE ---
+    const formSchema = <%- JSON.stringify(formSchema) %>;
+
+    async function initPage() {
+        let contextData = {};
+
+        // A. On exécute le Preflight (s'il existe)
+        if (typeof window.runPreflight === 'function') {
+            try {
+                console.log("🕵️ Récupération du contexte...");
+                contextData = await window.runPreflight();
+                
+                // 1. On met à jour le cache pour les headers (Backend)
+                window.PREFLIGHT_CACHE = contextData || {};
+                
+                console.log("✅ Contexte chargé :", contextData);
+            } catch (err) {
+                console.error("❌ Erreur Preflight:", err);
+            }
+        }
+
+        // B. On initialise le formulaire AVEC les données (Frontend)
+        Formio.createForm(document.getElementById('formio'), formSchema)
+            .then(function(form) {
+                
+                // C'EST ICI QUE ÇA SE PASSE : Pré-remplissage
+                if (contextData && Object.keys(contextData).length > 0) {
+                    // On injecte les données du preflight directement dans le formulaire
+                    form.submission = {
+                        data: { 
+                            ...form.submission.data, // Garde les défauts éventuels
+                            ...contextData           // Écrase avec les données de l'URL
+                        }
+                    };
+                    console.log("📝 Champs du formulaire remplis automatiquement.");
+                }
+
+                form.on('submitDone', function(submission) {
+                     alert('Document transmis avec succès !');
+                });
+            });
+    }
+
+    // Lancement de la page
+    initPage();
+
 })();
-
-
 </script>
-
 </body>
-</html>

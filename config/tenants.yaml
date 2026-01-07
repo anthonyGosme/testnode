@@ -11,6 +11,7 @@ tenants:
     theme:
       primaryColor: "#4f46e5"
     metaKey: "codeProjet"
+
   clientB:
       active: true
       name: "Service Recrutement RH"
@@ -23,3 +24,32 @@ tenants:
       theme:
         primaryColor: "#059669" # Vert
       metaKey: "nomCandidat"
+
+  clientC:
+    active: true
+    name: "Entreprise C"
+    match:
+      subdomain: "client-c"      # http://client-c:3000
+      path: "client-c"           # http://localhost:3000/client-c
+    paths:
+      form: "./tenants/clientC/form.json"
+      action: "./tenants/clientC/action.js"
+      preflight: "./tenants/clientC/preflight.js"
+    theme:
+      primaryColor: "#ea580c"
+    metaKey: "codeProjet"
+
+  clientD:
+    active: true
+    name: "Client D (Sécurisé)"
+    match:
+      subdomain: "client-d"
+      path: "client-d"
+    paths:
+
+      form: "./tenants/clientD/form.json"
+      action: "./tenants/clientD/action.js"
+      preflight: "./tenants/clientD/preflight.js"
+    theme:
+      primaryColor: "#0f172a" 
+    metaKey: "userLogin"
