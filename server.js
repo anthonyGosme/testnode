@@ -85,9 +85,24 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // --- 4. Routes ---
+app.get(['/preflight.js', '/:pathPrefix/preflight.js'], resolveTenant, (req, res) => {
+    const tenant = req.tenant;
 
-// Route A : Affichage du formulaire (GET)
-// Gère /client-a/ ou / (si sous-domaine)
+    // CORRECTION : On regarde dans tenant.paths.preflight
+    if (!tenant.paths || !tenant.paths.preflight) {
+        return res.status(404).send('// No preflight script configured');
+    }
+
+    const absolutePath = path.resolve(__dirname, tenant.paths.preflight);
+
+    res.sendFile(absolutePath, (err) => {
+        if (err) {
+            console.error(`Erreur chargement preflight:`, err);
+            res.status(404).send('// File not found');
+        }
+    });
+});
+
 app.get(['/', '/:pathPrefix'], resolveTenant, (req, res) => {
     // Si l'utilisateur tape /client-a, le middleware l'a détecté.
     // Si l'utilisateur tape / (sur sous-domaine), le middleware l'a détecté.
@@ -112,7 +127,8 @@ app.get(['/', '/:pathPrefix'], resolveTenant, (req, res) => {
         res.render('layout', { 
             tenant: req.tenant,
             formSchema: formSchema,
-            uploadUrl: fullUploadUrl
+            uploadUrl: fullUploadUrl,
+            urlBase: req.uploadUrlBase,
         });
 
     } catch (err) {
@@ -120,7 +136,8 @@ app.get(['/', '/:pathPrefix'], resolveTenant, (req, res) => {
         res.status(500).send("Erreur chargement configuration formulaire.");
     }
 });
-
+// Route A : Affichage du formulaire (GET)
+// Gère /client-a/ ou / (si sous-domaine)
 // Route B : Traitement de l'upload (POST)
 // On accepte /upload (sous-domaine) ou /client-a/upload (path)
 app.post(['/upload', '/:pathPrefix/upload'], resolveTenant, upload.single('file'), async (req, res) => {

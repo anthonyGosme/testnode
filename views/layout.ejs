@@ -95,9 +95,25 @@
         });
     });
 </script>
-
+<% if (tenant.paths && tenant.paths.preflight) { %>
+    <script src="<%= urlBase %>/preflight.js"></script>
+<% } %>
 <script>
 (function() {
+    window.PREFLIGHT_CACHE = {};
+    console.log("preglight test");
+    if (typeof window.runPreflight === 'function') {
+        console.log("🕵️ Lancement du Preflight au chargement...");
+        window.runPreflight()
+            .then(meta => {
+                window.PREFLIGHT_CACHE = meta || {};
+                console.log("✅ Données Preflight chargées :", window.PREFLIGHT_CACHE);
+            })
+            .catch(err => {
+                console.error("❌ Erreur Preflight :", err);
+            });
+    }
+
     console.log("🕵️ Démarrage de l'Intercepteur Dynamique...");
 
     const metaKeyConfig = "<%= tenant.metaKey || 'refFacture' %>";
@@ -146,6 +162,8 @@
     };
 
 })();
+
+
 </script>
 
 </body>
