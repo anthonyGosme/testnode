@@ -3,69 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Espace Upload - <%= tenant.name %></title>
+    <title>Espace Dépôt - <%= tenant.name %></title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
     <link rel='stylesheet' href='https://cdn.form.io/formiojs/formio.full.min.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src='https://cdn.form.io/formiojs/formio.full.min.js'></script>
 
     <style>
-        /* Injection de la couleur du thème depuis le YAML */
-        :root {
-            --primary-color: <%= tenant.theme.primaryColor %>;
-        }
-
-        body {
-            background-color: #f3f4f6;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* Injection du thème client */
+        :root { --primary-color: <%= tenant.theme.primaryColor %>; }
+        
+        body { 
+            background-color: #f3f4f6; 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-family: 'Segoe UI', sans-serif; 
             margin: 0;
-        }
-
-        .card {
-            background: white;
-            border: none;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            width: 90%;
-            max-width: 600px;
-            overflow: hidden;
-            border-radius: 12px;
-        }
-
-        .card-header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1.5rem;
-            text-align: center;
-            border-bottom: none;
-        }
-
-        .card-header h3 {
-            margin: 0;
-            font-weight: 600;
-        }
-
-        .card-body {
-            padding: 2rem;
-        }
-
-        /* Petits ajustements pour que le composant File de Form.io soit joli */
-        .formio-component-file {
-            background: #f8fafc;
-            padding: 15px;
-            border: 2px dashed #cbd5e1;
-            border-radius: 8px;
-            margin-top: 20px;
         }
         
-        .btn-primary {
-            background-color: var(--primary-color) !important;
-            border-color: var(--primary-color) !important;
+        .card { 
+            border: none; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            width: 90%; 
+            max-width: 600px; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            background: white; 
+        }
+        
+        .card-header { 
+            background-color: var(--primary-color); 
+            color: white; 
+            padding: 1.5rem; 
+            text-align: center; 
+        }
+        
+        .card-body { padding: 2rem; }
+        
+        .formio-component-file { 
+            background: #f8fafc; 
+            padding: 15px; 
+            border: 2px dashed #cbd5e1; 
+            border-radius: 8px; 
+            margin-top: 20px; 
+        }
+        
+        .btn-primary { 
+            background-color: var(--primary-color) !important; 
+            border-color: var(--primary-color) !important; 
         }
     </style>
 </head>
@@ -73,39 +62,24 @@
 
 <div class="card">
     <div class="card-header">
-        <h3><%= tenant.name %></h3>
-        <small>Portail Sécurisé de Dépôt</small>
+        <h3 class="m-0"><%= tenant.name %></h3>
+        <small>Portail Sécurisé</small>
     </div>
     <div class="card-body">
         <div id="formio"></div>
     </div>
 </div>
 
-<script>
-
-    const formSchema = <%- JSON.stringify(formSchema) %>;
-
-    Formio.createForm(document.getElementById('formio'), formSchema)
-    .then(function(form) {
-        console.log("✅ Formulaire chargé avec succès.");
-
-        // Feedback quand le formulaire global est soumis
-        form.on('submitDone', function(submission) {
-             alert('Document transmis avec succès !');
-        });
-    });
-</script>
 <% if (tenant.paths && tenant.paths.preflight) { %>
     <script src="<%= urlBase %>/preflight.js"></script>
 <% } %>
 
 <script>
 (function() {
-    // --- 1. CONFIGURATION INTERCEPTEUR (Reste actif pour l'upload) ---
-    // On le déclare tout de suite pour qu'il soit prêt
-    window.PREFLIGHT_CACHE = {}; 
-    const metaKeyConfig = "<%= tenant.metaKey || 'refFacture' %>";
+    // --- 1. CONFIGURATION DE L'INTERCEPTEUR (Cœur du système) ---
+    // Cet intercepteur agit au moment où le fichier est envoyé par Form.io
     
+    window.PREFLIGHT_CACHE = {}; 
     const originalOpen = XMLHttpRequest.prototype.open;
     const originalSend = XMLHttpRequest.prototype.send;
 
@@ -115,73 +89,93 @@
     };
 
     XMLHttpRequest.prototype.send = function(body) {
+        // On ne cible que les requêtes d'upload de fichiers
         if (this._debugUrl && this._debugUrl.includes('upload')) {
-            // ... (Votre logique d'injection de headers existante) ...
-            // Elle utilisera window.PREFLIGHT_CACHE qui sera rempli juste après
+            console.log("📤 Interception de l'upload vers : " + this._debugUrl);
+
+            // A. Injection des données du Preflight (Login, Contexte URL...)
             if (window.PREFLIGHT_CACHE) {
                  Object.keys(window.PREFLIGHT_CACHE).forEach(key => {
-                    let headerKey = key.toLowerCase();
-                    if (!headerKey.startsWith('x-meta-')) headerKey = `x-meta-ctx-${headerKey}`; 
-                    this.setRequestHeader(headerKey, encodeURIComponent(window.PREFLIGHT_CACHE[key]));
+                    let h = key.toLowerCase();
+                    // On préfixe par sécurité 'ctx' pour les données système
+                    if (!h.startsWith('x-meta-')) h = `x-meta-ctx-${h}`; 
+                    this.setRequestHeader(h, encodeURIComponent(window.PREFLIGHT_CACHE[key]));
                 });
             }
-            // Injection de la valeur du champ principal (metaKey)
-            const inputName = `data[${metaKeyConfig}]`;
-            const inputElement = document.querySelector(`input[name="${inputName}"]`);
-            if (inputElement && inputElement.value) {
-                 this.setRequestHeader(`x-meta-${metaKeyConfig.toLowerCase()}`, encodeURIComponent(inputElement.value));
-            }
+
+            // B. Injection AUTOMATIQUE de tous les champs du formulaire (Correctif Universel)
+            // On cherche : Inputs, Selects (listes), Textareas qui ont un nom type "data[...]"
+            const formElements = document.querySelectorAll('input[name^="data["], select[name^="data["], textarea[name^="data["]');
+            
+            formElements.forEach(el => {
+                // 1. On extrait le nom de la variable (ex: "refDossier" depuis "data[refDossier]")
+                const match = el.name.match(/data\[(.*?)\]/);
+                
+                // Si pas de match ou si c'est le champ fichier lui-même, on ignore
+                if (!match || !match[1] || el.type === 'file') return;
+
+                // Cas particulier : Radio/Checkbox (on ne prend que ce qui est coché)
+                if ((el.type === 'radio' || el.type === 'checkbox') && !el.checked) return;
+
+                const key = match[1].toLowerCase(); // ex: refdossier
+                const headerName = `x-meta-${key}`; // ex: x-meta-refdossier
+                const value = el.value;
+
+                // 2. Si une valeur existe, on l'ajoute en header
+                if (value && value.trim() !== "") {
+                    // Note: encodeURIComponent est vital pour les accents et caractères spéciaux
+                    this.setRequestHeader(headerName, encodeURIComponent(value));
+                    console.log(`   ➕ Métadonnée ajoutée : ${headerName} = ${value}`);
+                }
+            });
         }
         return originalSend.apply(this, arguments);
     };
 
-
-    // --- 2. ORCHESTRATION : PREFLIGHT PUIS FORMULAIRE ---
+    // --- 2. INITIALISATION DE LA PAGE ---
     const formSchema = <%- JSON.stringify(formSchema) %>;
 
     async function initPage() {
         let contextData = {};
-
-        // A. On exécute le Preflight (s'il existe)
+        
+        // Etape A : Exécution du script Preflight (si présent)
         if (typeof window.runPreflight === 'function') {
             try {
-                console.log("🕵️ Récupération du contexte...");
+                console.log("🕵️ Exécution du Preflight...");
                 contextData = await window.runPreflight();
                 
-                // 1. On met à jour le cache pour les headers (Backend)
+                // On stocke le résultat pour l'intercepteur ci-dessus
                 window.PREFLIGHT_CACHE = contextData || {};
-                
                 console.log("✅ Contexte chargé :", contextData);
             } catch (err) {
                 console.error("❌ Erreur Preflight:", err);
             }
         }
 
-        // B. On initialise le formulaire AVEC les données (Frontend)
+        // Etape B : Affichage du formulaire
         Formio.createForm(document.getElementById('formio'), formSchema)
-            .then(function(form) {
-                
-                // C'EST ICI QUE ÇA SE PASSE : Pré-remplissage
-                if (contextData && Object.keys(contextData).length > 0) {
-                    // On injecte les données du preflight directement dans le formulaire
-                    form.submission = {
-                        data: { 
-                            ...form.submission.data, // Garde les défauts éventuels
-                            ...contextData           // Écrase avec les données de l'URL
-                        }
-                    };
-                    console.log("📝 Champs du formulaire remplis automatiquement.");
-                }
+        .then(function(form) {
+            
+            // Pré-remplissage des champs visuels avec les données du contexte
+            if (Object.keys(contextData).length > 0) {
+                form.submission = {
+                    data: { ...form.submission.data, ...contextData }
+                };
+                console.log("📝 Formulaire pré-rempli.");
+            }
 
-                form.on('submitDone', function(submission) {
-                     alert('Document transmis avec succès !');
-                });
+            // Feedback simple lors de la validation finale
+            // (Note: Dans votre mode actuel, le fichier est déjà parti à ce moment là)
+            form.on('submitDone', function(submission) {
+                 alert('Dossier traité avec succès !');
             });
+        });
     }
 
-    // Lancement de la page
+    // Lancement
     initPage();
 
 })();
 </script>
 </body>
+</html>
